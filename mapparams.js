@@ -16,9 +16,10 @@ function init () {
         center: [57.5262, 38.3061], // Углич
         zoom: 11,
         type: mapType,
-        "controls": []
+        "controls": [],
+        "behaviors":[]
     }, {
-        balloonMaxWidth: 200,
+        balloonMaxWidth: 100,
         searchControlProvider: 'yandex#search'
             });
 
@@ -70,11 +71,10 @@ function init () {
     myMap.events.add('click', function (e) {
         if (!myMap.balloon.isOpen()) {
             var coords = e.get('coords');
-            myMap.center = coords;
+            myMap.panTo(coords);
+
             myMap.balloon.open(coords, {
-                contentHeader:'Событие!',
-                contentBody:'<p>Кто-то щелкнул по карте.</p>' +
-                    '<p>Координаты щелчка: ' + [
+                contentBody:'<p>Координаты центра: ' + [
                     coords[0].toPrecision(6),
                     coords[1].toPrecision(6)
                     ].join(', ') + '</p>',
