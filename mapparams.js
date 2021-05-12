@@ -13,14 +13,14 @@ function init () {
     let mapType = 'yandex#map';
 
     myMap = new ymaps.Map("map", {
-        center: [57.5262, 38.3061], // Углич
+        center: [55.7565, 37.6143], // Москва
         zoom: 11,
         type: mapType,
         "controls": [],
         "behaviors":[]
     }, {
         balloonMaxWidth: 100,
-        searchControlProvider: 'yandex#search'
+        searchControlProvider: 'yandex#search',"suppressMapOpenBlock": true
             });
 
     typeOfMap.onchange = function () {
