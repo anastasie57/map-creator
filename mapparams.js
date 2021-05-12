@@ -1,6 +1,12 @@
 ymaps.ready(init);
 var myMap;
 
+let centerCoords = [55.7565, 37.6143];
+let zoomValue = 10;
+let mapTypeValue = 'yandex#map';
+let controlsValue = [];
+let behaviors = [];
+
 function init () {
     let typeOfMap = document.querySelector(".typeOfMap");
     let setUpZoom = document.querySelector(".setUpZoom");
@@ -14,7 +20,7 @@ function init () {
 
     myMap = new ymaps.Map("map", {
         center: [55.7565, 37.6143], // Москва
-        zoom: 11,
+        zoom: 10,
         type: mapType,
         "controls": [],
         "behaviors":[]
@@ -27,42 +33,46 @@ function init () {
         mapType = "yandex#" + typeOfMap.value;
         console.log(mapType);
         myMap.setType(mapType);
+
+        mapTypeValue = mapType;
     };
 
     setUpZoom.oninput = function () {
         pixels.textContent = setUpZoom.value;
         console.log(setUpZoom.value);
         myMap.setZoom(setUpZoom.value);
+
+        zoomValue = setUpZoom.value;
     };
 
     ruler.onchange = function () {
         console.log(ruler.value);
-        if (ruler.checked) {myMap.controls.add('rulerControl');}
-        else {myMap.controls.remove('rulerControl');}
+        if (ruler.checked) {myMap.controls.add('rulerControl', controlsValue.push('\"rulerControl\"'));}
+        else {myMap.controls.remove('rulerControl'), controlsValue = controlsValue.filter(val => val !== '\"rulerControl\"');;}
     };
 
     zoom.onchange = function () {
         console.log(zoom.value);
-        if (zoom.checked) {myMap.controls.add('zoomControl');}
-        else {myMap.controls.remove('zoomControl');}
+        if (zoom.checked) {myMap.controls.add('zoomControl'), controlsValue.push('\"zoomControl\"');}
+        else {myMap.controls.remove('zoomControl'), controlsValue = controlsValue.filter(val => val !== '\"zoomControl\"');}
     };
 
     layers.onchange = function () {
         console.log(layers.value);
-        if (layers.checked) {myMap.controls.add('typeSelector');}
-        else {myMap.controls.remove('typeSelector');}
+        if (layers.checked) {myMap.controls.add('typeSelector'), controlsValue.push('\"typeSelector\"');}
+        else {myMap.controls.remove('typeSelector'), controlsValue = controlsValue.filter(val => val !== '\"typeSelector\"');}
     };
 
     dragEnable.onchange = function () {
         console.log(dragEnable.value);
-        if (dragEnable.checked) {myMap.behaviors.enable('drag');;}
-        else {myMap.behaviors.disable('drag');;}
+        if (dragEnable.checked) {myMap.behaviors.enable('drag'), behaviors.push('\"drag\"');;}
+        else {myMap.behaviors.disable('drag'), behaviors = behaviors.filter(val => val !== '\"drag\"');}
     };
 
     zoomEnable.onchange = function () {
         console.log(zoomEnable.value);
-        if (zoomEnable.checked) {myMap.behaviors.enable('scrollZoom', 'dblClickZoom', 'multiTouch');;}
-        else {myMap.behaviors.disable('scrollZoom', 'dblClickZoom', 'multiTouch');;}
+        if (zoomEnable.checked) {myMap.behaviors.enable('scrollZoom', 'dblClickZoom', 'multiTouch'), behaviors.push('\"scrollZoom\"', '\"dblClickZoom\"', '\"multiTouch\"');}
+        else {myMap.behaviors.disable('scrollZoom', 'dblClickZoom', 'multiTouch'), behaviors = behaviors.filter(val => val !== '\"scrollZoom\"'), behaviors = behaviors.filter(val => val !== '\"dblClickZoom\"'), behaviors = behaviors.filter(val => val !== '\"multiTouch\"');}
     };
 
     // Обработка события, возникающего при щелчке
@@ -72,6 +82,8 @@ function init () {
         if (!myMap.balloon.isOpen()) {
             var coords = e.get('coords');
             myMap.panTo(coords);
+
+            centerCoords = coords;
 
             myMap.balloon.open(coords, {
                 contentBody:'<p>Координаты центра: ' + [
@@ -100,7 +112,7 @@ function init () {
     });
 }
 
-let button = document.querySelector(".createJson")
+let button = document.querySelector(".createJson");
 
 button.addEventListener(
   "click",
@@ -118,18 +130,32 @@ button.addEventListener(
 
     const data = Object.fromEntries(arr);
 
-    console.log(data);
+    const template = `{"mapSettings": {
+        "state": {
+            "center": [${centerCoords}],
+            "zoom": ${zoomValue},
+            "type": "${mapTypeValue}",
+            "controls": [${controlsValue}],
+            "behaviors": [${behaviors}]
+        },
+        "options": {
+            "suppressMapOpenBlock": true
+        },
+        "hideLabels": false,
+        "size": "auto"
+    }
+    }`
 
-    const file = new Blob([JSON.stringify(data)], {
-      type: "application/json"
-    });
+    console.log(template);
+
+    const file = new Blob([template], {type:"application/json;charset=utf-8;"});
 
     const link = document.createElement("a");
     link.setAttribute("href", URL.createObjectURL(file));
     link.setAttribute("download", "data.json");
-    link.textContent = "DOWNLOAD DATA";
+    link.textContent = "Скачать json-разметку";
     document.querySelector(".main").append(link);
-    URL.revokeObjectURL(file);
+    //URL.revokeObjectURL(file);
   },
   { once: true }
 );
